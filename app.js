@@ -9,6 +9,8 @@ require('./db');
 // https://www.npmjs.com/package/express
 const express = require('express');
 
+const mongoose = require("mongoose");
+
 // Handles the handlebars
 // https://www.npmjs.com/package/hbs
 const hbs = require('hbs');
@@ -25,10 +27,28 @@ const capitalized = string => string[0].toUpperCase() + string.slice(1).toLowerC
 app.locals.title = `${capitalized(projectName)}- Generated with Ironlauncher`;
 
 // 👇 Start handling routes here
+
+const celebritiesRouter = require('./routes/celebrities.routes')
+app.use("/celebrities", celebritiesRouter);
+const moviesRouter = require('./routes/movies.routes')
+app.use("/movies", moviesRouter);
+
 const index = require('./routes/index');
 app.use('/', index);
 
 // ❗ To handle errors. Routes that don't exist or errors that you handle in specific routes
 require('./error-handling')(app);
+
+const MONGO_URI = 
+process.env.MONGODB_URI || "mongodb://localhost/lab-movies-celebrities";
+
+mongoose
+  .connect(MONGO_URI)
+  .then((x) => {
+    console.log(`Connected to Mongo! Database name: "${x.connections[0].name}"`);
+  })
+  .catch((err) => {
+    console.error("Error connecting to mongo: ", err);
+  });
 
 module.exports = app;
